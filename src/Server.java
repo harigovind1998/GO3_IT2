@@ -16,7 +16,6 @@ public class Server {
 		while(true) {
 			recievePacket = com.recievePacket(recieveSocket, REQUEST_SIZE); 
 			if (com.checkMessage(recievePacket.getData())) {
-				
 				ServerWorker worker = new ServerWorker(Integer.toString((recievePacket.getPort())), recievePacket,mode);
 				worker.start();
 			}else {
@@ -34,7 +33,7 @@ public class Server {
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Select Mode : Quiet [0], Verbose [1]");
 		mode = sc.nextInt();
-		sc.close();
+		//sc.close();
 		com = new ComFunctions();
 		recieveSocket = com.startSocket(69);
 		//recievePacket = com.createPacket(BLOCK_SIZE);

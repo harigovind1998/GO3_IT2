@@ -728,63 +728,94 @@ public class ComFunctions {
 		
 	}
 	
-	public void verboseMode(String status, byte[] packetType, String filename, String mode, JTextArea a) {
-		String type = null;
-		a.append("Packet " + status + "\n");
-		if(packetType[0] ==  (byte)0 && packetType[1] == (byte)1) {
-			type = "RRQ";
-		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)2) {
-			type = "WRQ";
-		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)3) {
-			type = "DATA";
-		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)4) {
-			type = "ACK";
-		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)5) {
-			type = "ERROR";
-		}
-		a.append(type + "\n");
-		a.append("File Name: " + filename + "\n");
-		a.append("Mode: " + mode + "\n");
-	}
+//	public void verboseMode(String status, byte[] packetType, String filename, String mode, JTextArea a) {
+//		String type = null;
+//		a.append("Packet " + status + "\n");
+//		if(packetType[0] ==  (byte)0 && packetType[1] == (byte)1) {
+//			type = "RRQ";
+//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)2) {
+//			type = "WRQ";
+//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)3) {
+//			type = "DATA";
+//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)4) {
+//			type = "ACK";
+//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)5) {
+//			type = "ERROR";
+//		}
+//		a.append(type + "\n");
+//		a.append("File Name: " + filename + "\n");
+//		a.append("Mode: " + mode + "\n");
+//	}
+//	
+//	public void verboseMode(String status, byte[] packetType, int blockNum, int numBytes, JTextArea a) {
+//		String type = null;
+//		a.append("Packet " + status + "\n");
+//		if(packetType[0] ==  (byte)0 && packetType[1] == (byte)1) {
+//			type = "RRQ";
+//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)2) {
+//			type = "WRQ";
+//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)3) {
+//			type = "DATA";
+//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)4) {
+//			type = "ACK";
+//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)5) {
+//			type = "ERROR";
+//		}
+//		a.append(type + "\n");
+//		a.append("Block Number: " + Integer.toString(blockNum) + "\n");
+//		a.append("Block Size: " + Integer.toString(numBytes) + "\n");
+//	}
+//	
+//	public void verboseMode(String status, byte[] packetType, byte[] blockNum, int numBytes, JTextArea a) {
+//		String type = null;
+//		a.append("Packet " + status + "\n");
+//		if(packetType[0] ==  (byte)0 && packetType[1] == (byte)1) {
+//			type = "RRQ";
+//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)2) {
+//			type = "WRQ";
+//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)3) {
+//			type = "DATA";
+//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)4) {
+//			type = "ACK";
+//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)5) {
+//			type = "ERROR";
+//		}
+//		a.append(type + "\n");
+//		a.append("Block Number: " + ByteBuffer.wrap(blockNum).getShort() + "\n");
+//		a.append("Block Size: " + Integer.toString(numBytes) + "\n");
+//	}
 	
-	public void verboseMode(String status, byte[] packetType, int blockNum, int numBytes, JTextArea a) {
-		String type = null;
-		a.append("Packet " + status + "\n");
-		if(packetType[0] ==  (byte)0 && packetType[1] == (byte)1) {
-			type = "RRQ";
-		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)2) {
-			type = "WRQ";
-		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)3) {
-			type = "DATA";
-		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)4) {
-			type = "ACK";
-		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)5) {
-			type = "ERROR";
+	public void verboseMode(String status, DatagramPacket packet, JTextArea a) {
+		byte[] packetData = packet.getData();
+		String verbose = "";
+		
+		verbose = verbose + "Packet " + status + "\n";
+		if(packetData[0] ==  (byte)0 && packetData[1] == (byte)1) {
+			verbose += "RRQ; " + getFileName(packetData) + "\n";
+		} else if (packetData[0] ==  (byte)0 && packetData[1] == (byte)2) {
+			verbose += "WRQ; " + getFileName(packetData) + "\n";
+		} else if (packetData[0] ==  (byte)0 && packetData[1] == (byte)3) {
+			byte[] blockNum = new byte[2];
+			blockNum[0] = packetData[2];
+			blockNum[1] = packetData[3];
+			int byteCounter = 0;
+			byte[] fileBlock = parseBlockData(packetData);
+			for(byte b: fileBlock) {
+				if(fileBlock[b] != (byte)0) {
+					byteCounter++;
+				}
+			}
+			verbose += "DATA; BlockNumber: " + ByteBuffer.wrap(blockNum).getShort() + "; Numer of Bytes: " + byteCounter + "\n";     
+		} else if (packetData[0] ==  (byte)0 && packetData[1] == (byte)4) {
+			byte[] blockNum = new byte[2];
+			blockNum[0] = packetData[2];
+			blockNum[1] = packetData[3];
+			verbose += "ACK; BlockNumber: " + ByteBuffer.wrap(blockNum).getShort() + "\n";
+		} else if (packetData[0] ==  (byte)0 && packetData[1] == (byte)5) {
+			verbose = "ERROR\n";
 		}
-		a.append(type + "\n");
-		a.append("Block Number: " + Integer.toString(blockNum) + "\n");
-		a.append("Block Size: " + Integer.toString(numBytes) + "\n");
+		a.append(verbose);
 	}
-	
-	public void verboseMode(String status, byte[] packetType, byte[] blockNum, int numBytes, JTextArea a) {
-		String type = null;
-		a.append("Packet " + status + "\n");
-		if(packetType[0] ==  (byte)0 && packetType[1] == (byte)1) {
-			type = "RRQ";
-		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)2) {
-			type = "WRQ";
-		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)3) {
-			type = "DATA";
-		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)4) {
-			type = "ACK";
-		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)5) {
-			type = "ERROR";
-		}
-		a.append(type + "\n");
-		a.append("Block Number: " + ByteBuffer.wrap(blockNum).getShort() + "\n");
-		a.append("Block Size: " + Integer.toString(numBytes) + "\n");
-	}
-	
 	
 	public String verboseMode(String status, DatagramPacket packet) {
 		byte[] packetData = packet.getData();
@@ -802,7 +833,7 @@ public class ComFunctions {
 			int byteCounter = 0;
 			byte[] fileBlock = parseBlockData(packetData);
 			for(byte b: fileBlock) {
-				if(fileBlock[b] != (byte)0) {
+				if(b != (byte)0) {
 					byteCounter++;
 				}
 			}

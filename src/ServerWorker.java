@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class ServerWorker extends Thread {
-	private final int BLOCK_SIZE = 512;
+	private final int BLOCK_SIZE = 516;
 	private DatagramPacket initialPacket, RecievedResponse, SendingResponse;
 	private int clientPort;
 	private String fileName;
@@ -82,7 +82,7 @@ public class ServerWorker extends Thread {
 	}
 	
 	private void writeServe(){
-		File yourFile = new File("./Server" + fileName);
+		File yourFile = new File("./Server/" + fileName);
 		try {
 			yourFile.createNewFile();
 		} catch (Exception e) {

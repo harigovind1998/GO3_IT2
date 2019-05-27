@@ -2,7 +2,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-
+import java.net.SocketException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,10 +33,16 @@ public class Client {
 	private int byteCounter = 0;
 	private int interHostPort = 23;
 	
-	public Client() {
+	public Client(){
 		// TODO Auto-generated constructor stub
 		com = new ComFunctions();
 		sendRecieveSocket = com.startSocket();
+		try {
+			sendRecieveSocket.setSoTimeout(500);
+		} catch (SocketException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		frame.setSize(420, 440);
 		area.setBounds(10, 10, 380, 380);
 		scroll = new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -110,26 +116,32 @@ public class Client {
 	
 	public void writeFile(String name, String format) {
 		byte[] fileAsByteArr = com.readFileIntoArray("./Client/"+name);
-		
-//		try {
-//			Files.write(f1path, fileAsByteArr);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
 		fileLength = fileAsByteArr.length;
 		byte[] request = com.generateMessage(wrq, name, format);
 		DatagramPacket sendPacket =  null;
 		DatagramPacket requestPacket = com.createPacket(request, interHostPort); //creating the datagram, specifying the destination port and message
-		com.sendPacket(requestPacket, sendRecieveSocket);
-		DatagramPacket recievePacket = com.recievePacket(sendRecieveSocket, com.UNKNOWNLEN);
+		DatagramPacket recievePacket = com.createPacket(com.UNKNOWNLEN);
+		reqLoop:
+		while(true) {			
+			com.sendPacket(requestPacket, sendRecieveSocket);
+			if (mode == 1) {
+				com.verboseMode("Sent", requestPacket, area);
+			}
+			try {
+				sendRecieveSocket.receive(recievePacket);
+				break reqLoop;
+			} catch (Exception e) {
+			// TODO: handle exception
+				com.verboseMode("ReSending", requestPacket, area);
+			}
+		}
+
 		if(!com.CheckAck(recievePacket, 0)) {
 			System.out.println("Not the correct ACK packet");
 			System.exit(0);
 		}
 		if (mode == 1) {
-			com.verboseMode("Sent", wrq, name, format, area);
+			com.verboseMode("Recieved", recievePacket, area);
 		}
 		
 		byte[] fileBlock = null;
@@ -138,32 +150,47 @@ public class Client {
 		numOfBlocks ++;
 		for(int i = 1; i < numOfBlocks; i++) {
 			fileBlock = com.getBlock(i, fileAsByteArr);
+			System.out.println(fileBlock.length);
 			msg = com.generateDataPacket(com.intToByte(i), fileBlock);
 	
 			sendPacket = com.createPacket(msg, interHostPort); //creating the datagram, specifying the destination port and message
-			byteCounter = 0;
-			for(byte b: fileBlock) {
-				if(fileBlock[b] != (byte)0) {
-					byteCounter++;
+//			byteCounter = 0;
+//			for(byte b: fileBlock) {
+//				if(fileBlock[b] != (byte)0) {
+//					byteCounter++;
+//				}
+//			}
+			recievePacket = com.createPacket(com.KNOWNLEN);
+			sendLoop:
+				while(true) {
+					com.sendPacket(sendPacket, sendRecieveSocket);
+					if(mode == 1) {
+						com.verboseMode("Sent", sendPacket, area);
+					}
+					try {
+						boolean temp = true;
+						while(temp) {
+							sendRecieveSocket.receive(recievePacket);
+							if(com.CheckAck(recievePacket, i)) {
+								temp = false;
+								messageReceived = recievePacket.getData();
+								com.guiPrintArr("Recieved message from Host:", messageReceived, area);
+								
+								if (mode == 1) {
+									com.verboseMode("Received", recievePacket, area);
+								}
+								break sendLoop;
+							}else {
+								System.out.println("Wrong AckPacket Recieved");
+							}
+							
+						}
+					} catch (Exception e) {
+						// TODO: handle exception
+						com.verboseMode("Resending", sendPacket, area);
+					}
 				}
-			}
-			com.sendPacket(sendPacket, sendRecieveSocket);	
 			
-			if(mode == 1) {
-				com.verboseMode("Sent", com.parsePacketType(msg), i, byteCounter, area);
-			}
-			
-			recievePacket = com.recievePacket(sendRecieveSocket, com.KNOWNLEN);
-			if(com.CheckAck(recievePacket, i)) {
-				messageReceived = recievePacket.getData();
-				com.guiPrintArr("Recieved message from Host:", messageReceived, area);
-				
-				if (mode == 1) {
-					com.verboseMode("Received", com.parsePacketType(messageReceived), i, messageReceived.length, area);
-				}
-			}else {
-				System.out.println("Wrong Packet Received");
-			}
 		}
 	}
 	
@@ -182,45 +209,53 @@ public class Client {
 		
 		f2path = Paths.get("./Client/" + name);
 		DatagramPacket sendPacket = com.createPacket(msg, interHostPort); //creating the datagram, specifying the destination port and message
-		com.sendPacket(sendPacket, sendRecieveSocket);
-		DatagramPacket recievePacket =  null;
+		
+		DatagramPacket recievePacket =  com.createPacket(516);
 		byte[] dataReceived = null;
-		if (mode == 1) {
-			com.verboseMode("Sent", rrq, name, format, area);
-		}
+		
+		
 		
 		outerloop:
 		while(true) {
-			recievePacket = com.recievePacket(sendRecieveSocket, 516);
+			sendLoop:
+			while(true) {
+				com.sendPacket(sendPacket, sendRecieveSocket);
+				if (mode == 1) {
+					com.verboseMode("Sent", sendPacket, area);
+				}
+				try {
+					sendRecieveSocket.receive(recievePacket);
+					if (mode == 1) {
+						com.verboseMode("Received", recievePacket, area);
+					}
+					break sendLoop;
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				
+			}
 			messageReceived = recievePacket.getData();
 			//Add check  to see if the packet is a data Packet
 			blockNum[0] =  messageReceived[2];
 			blockNum[1] = messageReceived[3];
 			dataReceived = com.parseBlockData(messageReceived);
-			byteCounter = 0;
-			for(byte b: dataReceived) {
-				if(dataReceived[b] != (byte)0) {
-					byteCounter++;
-				}
-			}
 				
-			if (mode == 1) {
-				com.verboseMode("Received", com.parsePacketType(dataReceived), blockNum, byteCounter, area);
-			}
+			
 			//This bit takes a lot of  time so we need  to implement a buffered write, which i  don't have time for rn
 			try {
 				Files.write(f2path, dataReceived, StandardOpenOption.APPEND);
 			}catch (IOException e) {
 				e.printStackTrace();
 			}
-				//System.arraycopy(dataReceived, 0, fileContent, 0, dataReceived.length);
+			//System.arraycopy(dataReceived, 0, fileContent, 0, dataReceived.length);
 			byte[] ackMsg = com.generateAckMessage(blockNum);
-			DatagramPacket ackPacket = com.createPacket(ackMsg, interHostPort);
-			com.sendPacket(ackPacket, sendRecieveSocket);
+			sendPacket = com.createPacket(ackMsg, interHostPort);
 			
-			if (mode == 1) {
-				com.verboseMode("Sent", com.parsePacketType(ackMsg), blockNum, byteCounter, area);
-			}
+//			com.sendPacket(sendPacket, sendRecieveSocket);
+//			
+//			if (mode == 1) {
+//				com.verboseMode("Sent", sendPacket, area);
+//			}
 				
 			//check to see if the bloc size is < 512, and if it is, break	
 			if(dataReceived[511] == (byte)0) {
