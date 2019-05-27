@@ -19,6 +19,7 @@ public class IntermediateHost {
 	 * Waits to recieve a message from the client and passes that on to the server
 	 */
 	public void recieveMessage(){
+		DatagramPacket tempPacket = null;
 		while(true) {
 			switch (simulation) {
 				case 0: 
@@ -114,9 +115,10 @@ public class IntermediateHost {
 					if (dataArr2[1] == 3 || dataArr2[1] == 4) {
 						byte[] blockNum = com.intToByte(packetNumber);
 						if(dataArr2[2] == blockNum[0] && dataArr2[3] == blockNum[1]) {
-							if(packetDelay == 0 ) {
-								com.sendPacket(serverSendPacket, sendRecieveSocket);
-							}
+								byte[] holdData = dataArr2;
+								holdData[2] = blockNum[0];
+								holdData[3] = blockNum[1];
+								tempPacket = com.createPacket(holdData, port);
 						}
 						
 					} else {
@@ -141,7 +143,12 @@ public class IntermediateHost {
 						System.out.println(com.verboseMode("Send", clientSendPacket));
 					}
 					com.sendPacket(clientSendPacket, clientSendSocket);
+					
 					packetDelay--;
+					
+					if(packetDelay == 0 ) {
+						com.sendPacket(tempPacket, sendRecieveSocket);
+					}
 				case 3:
 					System.out.println("Simulating Duplicate Packet...");
 					
