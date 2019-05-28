@@ -16,6 +16,9 @@ public class Server {
 		while(true) {
 			recievePacket = com.recievePacket(recieveSocket, REQUEST_SIZE); 
 			if (com.checkMessage(recievePacket.getData())) {
+				if(mode == 1) {
+					System.out.println(com.verboseMode("Recieve", recievePacket));
+				}
 				ServerWorker worker = new ServerWorker(Integer.toString((recievePacket.getPort())), recievePacket,mode);
 				worker.start();
 			}else {

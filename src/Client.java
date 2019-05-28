@@ -169,20 +169,20 @@ public class Client {
 							if(com.CheckAck(recievePacket, i)) {
 								temp = false;
 								messageReceived = recievePacket.getData();
-								com.guiPrintArr("Recieved message from Host:", messageReceived, area);
+								
 								
 								if (mode == 1) {
-									com.verboseMode("Received", recievePacket, area);
+									com.verboseMode("Received:", recievePacket, area);
 								}
 								break sendLoop;
 							}else {
-								area.append("Wrong AckPacket Recieved\n");
+								area.append("Wrong AckPacket Recieved, ignoring\n");
 							}
 							
 						}
 					} catch (Exception e) {
 						// TODO: handle exception
-						com.verboseMode("Resending", sendPacket, area);
+						com.verboseMode("Preparing to resend packet:", sendPacket, area);
 					}
 				}
 			

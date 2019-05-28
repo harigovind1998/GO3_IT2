@@ -814,6 +814,7 @@ public class ComFunctions {
 		} else if (packetData[0] ==  (byte)0 && packetData[1] == (byte)5) {
 			verbose = "ERROR\n";
 		}
+		verbose += "\n";
 		a.append(verbose);
 	}
 	
