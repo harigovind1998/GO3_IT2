@@ -10,7 +10,7 @@ import java.util.Arrays;
 public class ServerWorker extends Thread {
 	private final int BLOCK_SIZE = 516;
 	private DatagramPacket initialPacket, RecievedResponse, SendingResponse;
-	private int clientPort;
+	private int interHostPort = 23;
 	private String fileName;
 	private DatagramSocket SendRecieveSocket; 
 	private ComFunctions com;
@@ -46,7 +46,6 @@ public class ServerWorker extends Thread {
 	 */
 	private void decodePacket() {
 		job = initialPacket.getData()[1]; //format of the message has been checked so second bit will determine if the request is a read or write
-		clientPort = initialPacket.getPort();
 		
 		getFileName();
 	}
@@ -64,7 +63,7 @@ public class ServerWorker extends Thread {
 			
 			byte[] msg = com.generateDataPacket(com.intToByte(blockNum), com.getBlock(blockNum, fileByteReadArray));
 			RecievedResponse = com.createPacket(100);
-			SendingResponse = com.createPacket(msg, clientPort);
+			SendingResponse = com.createPacket(msg, interHostPort);
 			
 			outterSend:
 				while(true) {
@@ -117,7 +116,7 @@ public class ServerWorker extends Thread {
 		int last;
 		RecievedResponse = com.createPacket(BLOCK_SIZE);
 		
-		SendingResponse = com.createPacket(com.generateAckMessage(com.intToByte(blockNum)), clientPort);
+		SendingResponse = com.createPacket(com.generateAckMessage(com.intToByte(blockNum)), interHostPort);
 		int expectedBlock = 1;
 		blockNum++;
 		outterLoop:
@@ -142,7 +141,7 @@ public class ServerWorker extends Thread {
 									com.writeArrayIntoFile(com.parseBlockData(RecievedResponse.getData()), Paths.get("./Server/" + fileName));
 									last = RecievedResponse.getData()[RecievedResponse.getLength() -1];
 									ackMsg = com.generateAckMessage(com.intToByte(blockNum));
-									SendingResponse = com.createPacket(ackMsg, clientPort);
+									SendingResponse = com.createPacket(ackMsg, interHostPort);
 									if(last == 0){
 										com.sendPacket(SendingResponse, SendRecieveSocket);
 										if(mode == 1) {
@@ -209,7 +208,7 @@ public class ServerWorker extends Thread {
 		com = new ComFunctions();
 		SendRecieveSocket = com.startSocket();
 		try {
-			SendRecieveSocket.setSoTimeout(1500);
+			SendRecieveSocket.setSoTimeout(1000);
 		} catch (SocketException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
