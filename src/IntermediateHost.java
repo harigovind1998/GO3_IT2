@@ -7,6 +7,7 @@ public class IntermediateHost {
 	DatagramSocket clientRecieveSocket, clientSendSocket, sendRecieveSocket;
 	DatagramPacket clientRecievePacket, clientSendPacket, serverSendPacket, serverRecievePacket;
 	ComFunctions com;
+	workerThread externalThread;
 	int port = 69;
 	int mode;
 	private int interHostPort = 23;
@@ -119,6 +120,8 @@ public class IntermediateHost {
 								holdData[2] = blockNum[0];
 								holdData[3] = blockNum[1];
 								tempPacket = com.createPacket(holdData, port);
+								Long delay = new Long(packetDelay);
+								externalThread = new workerThread(tempPacket, sendRecieveSocket, delay);
 						}
 						
 					} else {
@@ -143,12 +146,6 @@ public class IntermediateHost {
 						System.out.println(com.verboseMode("Send", clientSendPacket));
 					}
 					com.sendPacket(clientSendPacket, clientSendSocket);
-					
-					packetDelay--;
-					
-					if(packetDelay == 0 ) {
-						com.sendPacket(tempPacket, sendRecieveSocket);
-					}
 				case 3:
 					System.out.println("Simulating Duplicate Packet...");
 					
@@ -219,7 +216,7 @@ public class IntermediateHost {
 			
 			if(simulation == 2) {
 				Scanner sc4 = new Scanner(System.in);
-				System.out.println("After how many packets would you like to send the delayed one?");
+				System.out.println("After how many milliseconds would you like to send the delayed one?");
 				packetDelay = sc4.nextInt();
 				sc4.close();
 			} else if (simulation == 3) {
