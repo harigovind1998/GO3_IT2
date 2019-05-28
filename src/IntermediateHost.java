@@ -54,6 +54,7 @@ public class IntermediateHost {
 						System.out.println(com.verboseMode("Send", clientSendPacket));
 					}
 					com.sendPacket(clientSendPacket, clientSendSocket);
+					break;
 				case 1:
 					System.out.println("Simulating Lost Packet...");
 					
@@ -73,7 +74,7 @@ public class IntermediateHost {
 						
 					} else {
 						serverSendPacket = com.createPacket(clientRecievePacket.getData(), port);
-					}
+					
 					
 					if(mode == 1) {
 						System.out.println(com.verboseMode("Send", clientRecievePacket));
@@ -96,6 +97,8 @@ public class IntermediateHost {
 						System.out.println(com.verboseMode("Send", clientSendPacket));
 					}
 					com.sendPacket(clientSendPacket, clientSendSocket);
+					}
+					break;
 				case 2:
 					System.out.println("Simulating Delayed Packet...");
 					
@@ -146,6 +149,7 @@ public class IntermediateHost {
 						System.out.println(com.verboseMode("Send", clientSendPacket));
 					}
 					com.sendPacket(clientSendPacket, clientSendSocket);
+					break;
 				case 3:
 					System.out.println("Simulating Duplicate Packet...");
 					
@@ -191,6 +195,7 @@ public class IntermediateHost {
 						System.out.println(com.verboseMode("Send", clientSendPacket));
 					}
 					com.sendPacket(clientSendPacket, clientSendSocket);
+					break;
 			}
 		}
 	}
@@ -223,9 +228,11 @@ public class IntermediateHost {
 				Scanner sc5 = new Scanner(System.in);
 				System.out.println("How many times would you like to duplicate this packet?");
 				dup = sc5.nextInt();
-				sc5.close();
+				
 			}
 		}
+		sc1.close();
+		
 		
 		com = new ComFunctions();
 		clientSendSocket = com.startSocket();
