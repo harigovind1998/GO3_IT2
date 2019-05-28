@@ -37,7 +37,7 @@ public class Client {
 		com = new ComFunctions();
 		sendRecieveSocket = com.startSocket();
 		try {
-			sendRecieveSocket.setSoTimeout(500);
+			sendRecieveSocket.setSoTimeout(1000);
 		} catch (SocketException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -128,20 +128,21 @@ public class Client {
 			}
 			try {
 				sendRecieveSocket.receive(recievePacket);
-				break reqLoop;
+				if (mode == 1) {
+					com.verboseMode("Recieved", recievePacket, area);
+				}
+				if(!com.CheckAck(recievePacket, 0)) {
+					System.out.println("Not the correct ACK packet, resending");
+				}else {
+					break reqLoop;
+				}
 			} catch (Exception e) {
 			// TODO: handle exception
 				com.verboseMode("ReSending", requestPacket, area);
 			}
 		}
 
-		if(!com.CheckAck(recievePacket, 0)) {
-			System.out.println("Not the correct ACK packet");
-			System.exit(0);
-		}
-		if (mode == 1) {
-			com.verboseMode("Recieved", recievePacket, area);
-		}
+		
 		
 		byte[] fileBlock = null;
 		byte [] msg =  null;
@@ -149,7 +150,7 @@ public class Client {
 		numOfBlocks ++;
 		for(int i = 1; i < numOfBlocks; i++) {
 			fileBlock = com.getBlock(i, fileAsByteArr);
-			System.out.println(fileBlock.length);
+
 			msg = com.generateDataPacket(com.intToByte(i), fileBlock);
 	
 			sendPacket = com.createPacket(msg, interHostPort); //creating the datagram, specifying the destination port and message
@@ -207,7 +208,7 @@ public class Client {
 		DatagramPacket recievePacket =  com.createPacket(516);
 		byte[] dataReceived = null;
 		
-		
+		int expectedBlock = 1;
 		
 		outerloop:
 		while(true) {
@@ -218,40 +219,71 @@ public class Client {
 					com.verboseMode("Sent", sendPacket, area);
 				}
 				try {
-					sendRecieveSocket.receive(recievePacket);
-					if (mode == 1) {
-						com.verboseMode("Received", recievePacket, area);
+					innerLoop:
+					while(true) {
+						sendRecieveSocket.receive(recievePacket);
+						if (mode == 1) {
+							com.verboseMode("Received", recievePacket, area);
+						}
+						messageReceived = recievePacket.getData();
+						//Add check  to see if the packet is a data Packet
+						blockNum[0] =  messageReceived[2];
+						blockNum[1] = messageReceived[3];
+						dataReceived = com.parseBlockData(messageReceived);
+						byte[] ackMsg = com.generateAckMessage(blockNum);
+						sendPacket = com.createPacket(ackMsg, interHostPort);
+						if(com.intToByte(expectedBlock)[0] == blockNum[0]&& com.intToByte(expectedBlock)[1] == blockNum[1]) {
+							expectedBlock++;
+							try {
+								Files.write(f2path, dataReceived, StandardOpenOption.APPEND);
+							}catch (IOException e) {
+								e.printStackTrace();
+							}
+							//System.arraycopy(dataReceived, 0, fileContent, 0, dataReceived.length);
+
+							if(dataReceived[511] == (byte)0) {
+								com.sendPacket(sendPacket, sendRecieveSocket);
+								if (mode == 1) {
+									com.verboseMode("Sent", sendPacket, area);
+								}
+								break outerloop;
+							}
+							break innerLoop;
+						}else {
+							area.append("Recieved the same data block multiple times\n");
+						}
 					}
 					break sendLoop;
 				} catch (Exception e) {
 					// TODO: handle exception
+					com.verboseMode("Resending", sendPacket, area);
 				}
 				
 			}
-			messageReceived = recievePacket.getData();
-			//Add check  to see if the packet is a data Packet
-			blockNum[0] =  messageReceived[2];
-			blockNum[1] = messageReceived[3];
-			dataReceived = com.parseBlockData(messageReceived);
+//			messageReceived = recievePacket.getData();
+//			//Add check  to see if the packet is a data Packet
+//			blockNum[0] =  messageReceived[2];
+//			blockNum[1] = messageReceived[3];
+//			dataReceived = com.parseBlockData(messageReceived);
 				
 			
 			//This bit takes a lot of  time so we need  to implement a buffered write, which i  don't have time for rn
-			try {
-				Files.write(f2path, dataReceived, StandardOpenOption.APPEND);
-			}catch (IOException e) {
-				e.printStackTrace();
-			}
-			//System.arraycopy(dataReceived, 0, fileContent, 0, dataReceived.length);
-			byte[] ackMsg = com.generateAckMessage(blockNum);
-			sendPacket = com.createPacket(ackMsg, interHostPort);
+//			try {
+//				Files.write(f2path, dataReceived, StandardOpenOption.APPEND);
+//			}catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//			//System.arraycopy(dataReceived, 0, fileContent, 0, dataReceived.length);
+//			byte[] ackMsg = com.generateAckMessage(blockNum);
+//			sendPacket = com.createPacket(ackMsg, interHostPort);
 	
-			if(dataReceived[511] == (byte)0) {
-				com.sendPacket(sendPacket, sendRecieveSocket);
-				if (mode == 1) {
-					com.verboseMode("Sent", sendPacket, area);
-				}
-				break outerloop;
-			}
+//			if(dataReceived[511] == (byte)0) {
+//				com.sendPacket(sendPacket, sendRecieveSocket);
+//				if (mode == 1) {
+//					com.verboseMode("Sent", sendPacket, area);
+//				}
+//				break outerloop;
+//			}
 			
 		}
 		
@@ -265,9 +297,9 @@ public class Client {
 		sc.close();
 		System.out.println(mode);
 
-		client.readFile("readTest.txt", "Ascii");
+		//client.readFile("readTest.txt", "Ascii");
 		
-		//client.writeFile("writeTest.txt", "Ascii");
+		client.writeFile("writeTest.txt", "Ascii");
 		
 
 	}
