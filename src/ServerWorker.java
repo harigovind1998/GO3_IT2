@@ -1,6 +1,8 @@
 import java.io.File;
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -60,19 +62,34 @@ public class ServerWorker extends Thread {
 		while(true){
 			
 			byte[] msg = com.generateDataPacket(com.intToByte(blockNum), com.getBlock(blockNum, fileByteReadArray));
-			
+			RecievedResponse = com.createPacket(100);
 			SendingResponse = com.createPacket(msg, clientPort);
 			if(mode == 1) {
 				System.out.println(com.verboseMode("Sent", SendingResponse));
 			}
-			com.sendPacket(SendingResponse, SendRecieveSocket);
-			RecievedResponse = com.recievePacket(SendRecieveSocket, 100);
-			if(mode == 1) {
-				System.out.println(com.verboseMode("Recieve", RecievedResponse));
-			}
-			if(!com.CheckAck(RecievedResponse, blockNum)) {
-				System.out.println("Wrong block recieved");
-			}
+			outterSend:
+				while(true) {
+					com.sendPacket(SendingResponse, SendRecieveSocket);
+					try {
+						innerSend:
+							while(true) {
+								SendRecieveSocket.receive(RecievedResponse);
+								if(mode == 1) {
+									System.out.println(com.verboseMode("Recieve", RecievedResponse));
+								}
+								if(com.CheckAck(RecievedResponse, blockNum)) {
+									break innerSend;
+								}else {
+									System.out.println("Wrong block recieved");
+								}
+							}
+						break outterSend;
+					} catch (IOException e) {
+						if(mode == 1) {
+							System.out.println(com.verboseMode("Resending", SendingResponse));
+						}
+					}
+				}
 			if(SendingResponse.getData()[SendingResponse.getLength() -1] == 0){
 				System.out.println("End of file reached");
 				break;
@@ -147,6 +164,12 @@ public class ServerWorker extends Thread {
 		super(name);
 		com = new ComFunctions();
 		SendRecieveSocket = com.startSocket();
+		try {
+			SendRecieveSocket.setSoTimeout(500);
+		} catch (SocketException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		initialPacket = packet;
 		this.mode = mode;
 	}

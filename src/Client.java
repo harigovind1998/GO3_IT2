@@ -30,7 +30,6 @@ public class Client {
 	private static byte[] rrq = {0,1};
 	private static byte[] wrq = {0,2};
 	private static int mode;
-	private int byteCounter = 0;
 	private int interHostPort = 23;
 	
 	public Client(){
