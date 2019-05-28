@@ -153,12 +153,7 @@ public class Client {
 			msg = com.generateDataPacket(com.intToByte(i), fileBlock);
 	
 			sendPacket = com.createPacket(msg, interHostPort); //creating the datagram, specifying the destination port and message
-//			byteCounter = 0;
-//			for(byte b: fileBlock) {
-//				if(fileBlock[b] != (byte)0) {
-//					byteCounter++;
-//				}
-//			}
+
 			recievePacket = com.createPacket(com.KNOWNLEN);
 			sendLoop:
 				while(true) {
@@ -249,15 +244,12 @@ public class Client {
 			//System.arraycopy(dataReceived, 0, fileContent, 0, dataReceived.length);
 			byte[] ackMsg = com.generateAckMessage(blockNum);
 			sendPacket = com.createPacket(ackMsg, interHostPort);
-			
-//			com.sendPacket(sendPacket, sendRecieveSocket);
-//			
-//			if (mode == 1) {
-//				com.verboseMode("Sent", sendPacket, area);
-//			}
-				
-			//check to see if the bloc size is < 512, and if it is, break	
+	
 			if(dataReceived[511] == (byte)0) {
+				com.sendPacket(sendPacket, sendRecieveSocket);
+				if (mode == 1) {
+					com.verboseMode("Sent", sendPacket, area);
+				}
 				break outerloop;
 			}
 			
