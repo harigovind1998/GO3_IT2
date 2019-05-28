@@ -16,187 +16,190 @@ public class IntermediateHost {
 	private static int packetDelay;
 	private static int simulation;
 	private static int dup;
+	private static int lostCounter;
 	/**
 	 * Waits to recieve a message from the client and passes that on to the server
 	 */
 	public void recieveMessage(){
 		DatagramPacket tempPacket = null;
+		while(true) {
 			switch (simulation) {
 				case 0: 
 					System.out.println("Simulating Normal Mode...");
-					while(true) {
-						//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
-						clientRecievePacket = com.recievePacket(clientRecieveSocket, 516);
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Recieve", clientRecievePacket));
-						}
-						
-						serverSendPacket = com.createPacket(clientRecievePacket.getData(), port);
-						
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Send", clientRecievePacket));
-						}
-						
-						com.sendPacket(serverSendPacket, sendRecieveSocket);
-						
-						//Listens to the server response, and forwards that on to the client in the reverse manner, printing each each of the messages
-						serverRecievePacket = com.recievePacket(sendRecieveSocket,516);
-						
-						port = serverRecievePacket.getPort();
-						
-			
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Recieve", serverRecievePacket));
-						}
-						
-						clientSendPacket = com.createPacket(serverRecievePacket.getData(), clientRecievePacket.getPort());
-						
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Send", clientSendPacket));
-						}
-						com.sendPacket(clientSendPacket, clientSendSocket);
+					
+					//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
+					clientRecievePacket = com.recievePacket(clientRecieveSocket, 516);
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Recieve", clientRecievePacket));
 					}
+					
+					serverSendPacket = com.createPacket(clientRecievePacket.getData(), port);
+					
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Send", clientRecievePacket));
+					}
+					
+					com.sendPacket(serverSendPacket, sendRecieveSocket);
+					
+					//Listens to the server response, and forwards that on to the client in the reverse manner, printing each each of the messages
+					serverRecievePacket = com.recievePacket(sendRecieveSocket,516);
+					
+					port = serverRecievePacket.getPort();
+					
+		
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Recieve", serverRecievePacket));
+					}
+					
+					clientSendPacket = com.createPacket(serverRecievePacket.getData(), clientRecievePacket.getPort());
+					
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Send", clientSendPacket));
+					}
+					com.sendPacket(clientSendPacket, clientSendSocket);
+					break;
 				case 1:
 					System.out.println("Simulating Lost Packet...");
-					while(true) {
-						//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
-						clientRecievePacket = com.recievePacket(clientRecieveSocket, 516);
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Recieve", clientRecievePacket));
-						}
-						
-						byte[] dataArr = clientRecievePacket.getData();
-						
-						if (dataArr[1] == 3 || dataArr[1] == 4) {
-							byte[] blockNum = com.intToByte(packetNumber);
-							if(dataArr[2] == blockNum[0] && dataArr[3] == blockNum[1]) {
-								//do nothing
-							}
-							
-						} else {
-							serverSendPacket = com.createPacket(clientRecievePacket.getData(), port);
-						}
-						
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Send", clientRecievePacket));
-						}
-						
-						com.sendPacket(serverSendPacket, sendRecieveSocket);
-						
-						//Listens to the server response, and forwards that on to the client in the reverse manner, printing each each of the messages
-						serverRecievePacket = com.recievePacket(sendRecieveSocket,516);
-						
-						port = serverRecievePacket.getPort();
-						
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Recieve", serverRecievePacket));
-						}
-						
-						clientSendPacket = com.createPacket(serverRecievePacket.getData(), clientRecievePacket.getPort());
-						
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Send", clientSendPacket));
-						}
-						com.sendPacket(clientSendPacket, clientSendSocket);
+					
+					//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
+					clientRecievePacket = com.recievePacket(clientRecieveSocket, 516);
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Recieve", clientRecievePacket));
 					}
+					
+					byte[] dataArr = clientRecievePacket.getData();
+					
+					if ((dataArr[1] == 3 || dataArr[1] == 4) && lostCounter == 0) {
+						byte[] blockNum = com.intToByte(packetNumber);
+						if(dataArr[2] == blockNum[0] && dataArr[3] == blockNum[1]) {
+							lostCounter++; //only lose it once
+						}
+						
+					} else {
+						serverSendPacket = com.createPacket(clientRecievePacket.getData(), port);
+					}
+					
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Send", clientRecievePacket));
+					}
+					
+					com.sendPacket(serverSendPacket, sendRecieveSocket);
+					
+					//Listens to the server response, and forwards that on to the client in the reverse manner, printing each each of the messages
+					serverRecievePacket = com.recievePacket(sendRecieveSocket,516);
+					
+					port = serverRecievePacket.getPort();
+					
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Recieve", serverRecievePacket));
+					}
+					
+					clientSendPacket = com.createPacket(serverRecievePacket.getData(), clientRecievePacket.getPort());
+					
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Send", clientSendPacket));
+					}
+					com.sendPacket(clientSendPacket, clientSendSocket);
+					break;
 				case 2:
 					System.out.println("Simulating Delayed Packet...");
-					while(true) {
-						//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
-						clientRecievePacket = com.recievePacket(clientRecieveSocket, 516);
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Recieve", clientRecievePacket));
-						}
-						
-						byte[] dataArr2 = clientRecievePacket.getData();
-						
-						serverSendPacket = com.createPacket(clientRecievePacket.getData(), port);
-						
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Send", clientRecievePacket));
-						}
-						
-						if (dataArr2[1] == 3 || dataArr2[1] == 4) {
-							byte[] blockNum = com.intToByte(packetNumber);
-							if(dataArr2[2] == blockNum[0] && dataArr2[3] == blockNum[1]) {
-									byte[] holdData = dataArr2;
-									holdData[2] = blockNum[0];
-									holdData[3] = blockNum[1];
-									tempPacket = com.createPacket(holdData, port);
-									Long delay = new Long(packetDelay);
-									externalThread = new workerThread(tempPacket, sendRecieveSocket, delay);
-							}
-							
-						} else {
-							com.sendPacket(serverSendPacket, sendRecieveSocket);
-						}
-						
-						com.sendPacket(serverSendPacket, sendRecieveSocket);
-						
-						//Listens to the server response, and forwards that on to the client in the reverse manner, printing each each of the messages
-						serverRecievePacket = com.recievePacket(sendRecieveSocket,516);
-						
-						port = serverRecievePacket.getPort();
-						
-			
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Recieve", serverRecievePacket));
-						}
-						
-						clientSendPacket = com.createPacket(serverRecievePacket.getData(), clientRecievePacket.getPort());
-						
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Send", clientSendPacket));
-						}
-						com.sendPacket(clientSendPacket, clientSendSocket);
+					
+					//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
+					clientRecievePacket = com.recievePacket(clientRecieveSocket, 516);
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Recieve", clientRecievePacket));
 					}
+					
+					byte[] dataArr2 = clientRecievePacket.getData();
+					
+					serverSendPacket = com.createPacket(clientRecievePacket.getData(), port);
+					
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Send", clientRecievePacket));
+					}
+					
+					if (dataArr2[1] == 3 || dataArr2[1] == 4) {
+						byte[] blockNum = com.intToByte(packetNumber);
+						if(dataArr2[2] == blockNum[0] && dataArr2[3] == blockNum[1]) {
+								byte[] holdData = dataArr2;
+								holdData[2] = blockNum[0];
+								holdData[3] = blockNum[1];
+								tempPacket = com.createPacket(holdData, port);
+								Long delay = new Long(packetDelay);
+								externalThread = new workerThread(tempPacket, sendRecieveSocket, delay);
+						}
+						
+					} else {
+						com.sendPacket(serverSendPacket, sendRecieveSocket);
+					}
+					
+					com.sendPacket(serverSendPacket, sendRecieveSocket);
+					
+					//Listens to the server response, and forwards that on to the client in the reverse manner, printing each each of the messages
+					serverRecievePacket = com.recievePacket(sendRecieveSocket,516);
+					
+					port = serverRecievePacket.getPort();
+					
+		
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Recieve", serverRecievePacket));
+					}
+					
+					clientSendPacket = com.createPacket(serverRecievePacket.getData(), clientRecievePacket.getPort());
+					
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Send", clientSendPacket));
+					}
+					com.sendPacket(clientSendPacket, clientSendSocket);
+					break;
 				case 3:
 					System.out.println("Simulating Duplicate Packet...");
-					while(true) {
-						//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
-						clientRecievePacket = com.recievePacket(clientRecieveSocket, 516);
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Recieve", clientRecievePacket));
-						}
-						
-						byte[] dataArr3 = clientRecievePacket.getData();
-						
-						if (dataArr3[1] == 3 || dataArr3[1] == 4) {
-							byte[] blockNum = com.intToByte(packetNumber);
-							if(dataArr3[2] == blockNum[0] && dataArr3[3] == blockNum[1]) {
-								for(int i = 0; i < dup; i++) {
-									serverSendPacket = com.createPacket(clientRecievePacket.getData(), port);
-								}
-							}
-							
-						} else {
-							serverSendPacket = com.createPacket(clientRecievePacket.getData(), port);
-						}
-						
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Send", clientRecievePacket));
-						}
-						
-						com.sendPacket(serverSendPacket, sendRecieveSocket);
-						
-						//Listens to the server response, and forwards that on to the client in the reverse manner, printing each each of the messages
-						serverRecievePacket = com.recievePacket(sendRecieveSocket,516);
-						
-						port = serverRecievePacket.getPort();
-						
-			
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Recieve", serverRecievePacket));
-						}
-						
-						clientSendPacket = com.createPacket(serverRecievePacket.getData(), clientRecievePacket.getPort());
-						
-						if(mode == 1) {
-							System.out.println(com.verboseMode("Send", clientSendPacket));
-						}
-						com.sendPacket(clientSendPacket, clientSendSocket);
+					
+					//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
+					clientRecievePacket = com.recievePacket(clientRecieveSocket, 516);
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Recieve", clientRecievePacket));
 					}
+					
+					byte[] dataArr3 = clientRecievePacket.getData();
+					
+					if (dataArr3[1] == 3 || dataArr3[1] == 4) {
+						byte[] blockNum = com.intToByte(packetNumber);
+						if(dataArr3[2] == blockNum[0] && dataArr3[3] == blockNum[1]) {
+							for(int i = 0; i < dup; i++) {
+								serverSendPacket = com.createPacket(clientRecievePacket.getData(), port);
+							}
+						}
+						
+					} else {
+						serverSendPacket = com.createPacket(clientRecievePacket.getData(), port);
+					}
+					
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Send", clientRecievePacket));
+					}
+					
+					com.sendPacket(serverSendPacket, sendRecieveSocket);
+					
+					//Listens to the server response, and forwards that on to the client in the reverse manner, printing each each of the messages
+					serverRecievePacket = com.recievePacket(sendRecieveSocket,516);
+					
+					port = serverRecievePacket.getPort();
+					
+		
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Recieve", serverRecievePacket));
+					}
+					
+					clientSendPacket = com.createPacket(serverRecievePacket.getData(), clientRecievePacket.getPort());
+					
+					if(mode == 1) {
+						System.out.println(com.verboseMode("Send", clientSendPacket));
+					}
+					com.sendPacket(clientSendPacket, clientSendSocket);
+					break;
 			}
+		}
 	}
 	
 	
