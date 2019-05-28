@@ -216,7 +216,7 @@ public class IntermediateHost {
 			
 			if(simulation == 2) {
 				Scanner sc4 = new Scanner(System.in);
-				System.out.println("After how many milliseconds would you like to send the delayed one?");
+				System.out.println("After how many milliseconds would you like delay the packet?");
 				packetDelay = sc4.nextInt();
 				sc4.close();
 			} else if (simulation == 3) {
