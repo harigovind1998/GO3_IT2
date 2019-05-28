@@ -37,7 +37,7 @@ public class Client {
 		com = new ComFunctions();
 		sendRecieveSocket = com.startSocket();
 		try {
-			sendRecieveSocket.setSoTimeout(1000);
+			sendRecieveSocket.setSoTimeout(1500);
 		} catch (SocketException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -176,7 +176,7 @@ public class Client {
 								}
 								break sendLoop;
 							}else {
-								System.out.println("Wrong AckPacket Recieved");
+								area.append("Wrong AckPacket Recieved");
 							}
 							
 						}

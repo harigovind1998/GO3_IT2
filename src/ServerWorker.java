@@ -155,7 +155,7 @@ public class ServerWorker extends Thread {
 								
 								}else {
 									System.out.println("Wrong data packet recieved");
-									System.exit(0);
+									
 								}
 						
 							}
