@@ -8,8 +8,11 @@ public class ServerExitListener extends Thread {
 		super(name);
 	}
 	
+	/**
+	 * Thread that waits for exit to be input into the console, exit is input, turns off the server
+	 */
 	public void run(){
-		boolean keepRunning = true;
+		
 		String cmd = "";
 		BufferedReader input = null;
 		
@@ -24,18 +27,5 @@ public class ServerExitListener extends Thread {
 			System.out.println("Server shutting down");
 			System.exit(0);
 		}
-//        BufferedReader reader =
-//                new BufferedReader(new InputStreamReader(System.in));
-//        String name = "";
-//		try {
-//			name = reader.readLine();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//        System.out.println(name);       
-//		
-//	}
-
 	}
 }

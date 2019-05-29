@@ -18,6 +18,6 @@ Yohannes -> Clean up client
 Iteration 2:
 
 Steven -> Transform IntermediateHost to error simulator and simulate the 3 errors along with keeping a normal mode
-Hari -> Tweaked Client to be able to handle the 3 type of errors 
+Hari -> Tweaked Client and server to be able to handle the 3 type of errors 
 Tarun -> Tweaked Server to handle 2 of 3 types of errors
 Yohannes -> Tweaked Server to handle 1 of 3 types of errors as well as created diagrams

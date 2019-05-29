@@ -22,24 +22,19 @@ public class Client {
 	private static JTextArea area = new JTextArea();
 	private static JScrollPane scroll;
 	private static byte[] messageReceived;
-	//private static Path f1path = FileSystems.getDefault().getPath("SYSC3303", "test.txt");
-	//public static Path f2path = FileSystems.getDefault().getPath("SYSC3303", "returnTest.txt");
 	public static  Path f2path = Paths.get("./Client/returnTest2.txt");
 	private int fileLength;
-	//private byte[] fileContent = new byte[fileLength];
 	private static byte[] rrq = {0,1};
 	private static byte[] wrq = {0,2};
 	private static int mode;
 	private int interHostPort = 23;
 	
 	public Client(){
-		// TODO Auto-generated constructor stub
 		com = new ComFunctions();
 		sendRecieveSocket = com.startSocket();
 		try {
 			sendRecieveSocket.setSoTimeout(1000);
 		} catch (SocketException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		frame.setSize(420, 440);
@@ -52,67 +47,11 @@ public class Client {
 		frame.setVisible(true);
 	}
 	
-    static File byteToFile(byte[] bytes, String path) { 
-    	System.out.println("Converting byte array to file...");
-    	File file = new File(path);
-        try { 
-            // Initialize a pointer 
-            // in file using OutputStream 
-            OutputStream os = new FileOutputStream(file); 
-  
-            // Starts writing the bytes in it 
-            os.write(bytes); 
-            System.out.println("Successfully converted byte array to file"); 
-  
-            // Close the file 
-            os.close(); 
-        } 
-  
-        catch (Exception e) { 
-            System.out.println("Exception: " + e); 
-        }
-        return file;
-    }
-		
 	/**
-	 * Sends the specified message to the intermediate host and waits for a response
-	 * @param type read or write 
-	 * @param file file name 
-	 * @param format format of file
+	 * Sends a local file to the server, uses a similar logic as the server read method
+	 * @param name
+	 * @param format
 	 */
-	/**
-    public void sendMesage(byte[] type, File file, String format) {
-		//generating the message in byte format
-		byte[] fileAsByteArr;
-		try {
-			fileAsByteArr = Files.readAllBytes(file.toPath());
-			fileLength = fileAsByteArr.length;
-			int numOfBlocks = (int) Math.ceil(fileLength / 512);
-			for(int i = 0; i < numOfBlocks; i++) {
-				byte[] fileBlock = com.getBlock(i, fileAsByteArr);
-				byte[] msg = com.generateMessage(type, fileBlock, format);
-				com.printMessage("Sending Message:", msg);
-				DatagramPacket sendPacket = com.createPacket(msg, 23); //creating the datagram, specifying the destination port and message
-				com.sendPacket(sendPacket, sendRecieveSocket);
-				
-				DatagramPacket recievePacket = com.recievePacket(sendRecieveSocket, com.KNOWNLEN);
-				if(com.CheckAck(recievePacket, i)) {
-					messageReceived = recievePacket.getData();
-					com.guiPrintArr("Recieved message from Host:", messageReceived, area);
-					
-					byte[] dataArr = com.parseBlockData(messageReceived);
-					System.arraycopy(dataArr, 0, fileContent, 0, dataArr.length);
-				}else {
-					System.out.println("Wrong Packet Received");
-				}
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	*/
-	
 	public void writeFile(String name, String format) {
 		byte[] fileAsByteArr = com.readFileIntoArray("./Client/"+name);
 		fileLength = fileAsByteArr.length;
@@ -141,8 +80,6 @@ public class Client {
 				com.verboseMode("ReSending", requestPacket, area);
 			}
 		}
-
-		
 		
 		byte[] fileBlock = null;
 		byte [] msg =  null;
@@ -169,8 +106,6 @@ public class Client {
 							if(com.CheckAck(recievePacket, i)) {
 								temp = false;
 								messageReceived = recievePacket.getData();
-								
-								
 								if (mode == 1) {
 									com.verboseMode("Received Packet:", recievePacket, area);
 								}
@@ -185,11 +120,15 @@ public class Client {
 						com.verboseMode("Preparing to resend packet:", sendPacket, area);
 					}
 				}
-			
 		}
 		area.append("End of File reached!\n");
 	}
 	
+	/**
+	 * Reads a remote file from the server, uses a similar as the write method in the server
+	 * @param name
+	 * @param format
+	 */
 	public void readFile(String name, String format) {
 		byte[] msg = com.generateMessage(rrq, name, format);
 		byte[] blockNum =  new byte[2];
@@ -260,32 +199,7 @@ public class Client {
 					com.verboseMode("Preparing to resend packet:", sendPacket, area);
 				}
 				
-			}
-//			messageReceived = recievePacket.getData();
-//			//Add check  to see if the packet is a data Packet
-//			blockNum[0] =  messageReceived[2];
-//			blockNum[1] = messageReceived[3];
-//			dataReceived = com.parseBlockData(messageReceived);
-				
-			
-			//This bit takes a lot of  time so we need  to implement a buffered write, which i  don't have time for rn
-//			try {
-//				Files.write(f2path, dataReceived, StandardOpenOption.APPEND);
-//			}catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//			//System.arraycopy(dataReceived, 0, fileContent, 0, dataReceived.length);
-//			byte[] ackMsg = com.generateAckMessage(blockNum);
-//			sendPacket = com.createPacket(ackMsg, interHostPort);
-	
-//			if(dataReceived[511] == (byte)0) {
-//				com.sendPacket(sendPacket, sendRecieveSocket);
-//				if (mode == 1) {
-//					com.verboseMode("Sent", sendPacket, area);
-//				}
-//				break outerloop;
-//			}
-			
+			}			
 		}
 		area.append("End of File reached!\n");
 		

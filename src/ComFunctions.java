@@ -336,7 +336,6 @@ public class ComFunctions {
 	
 	public final int KNOWNLEN = 4;
 	public final int UNKNOWNLEN = 100;
-	private final static char[] hexArr = "0123456789ABCDEF".toCharArray();
 	
 	/**
 	 * Recieves a packet on the specified socket 
@@ -616,27 +615,6 @@ public class ComFunctions {
         return bytesArray;
 	}
 	
-	public static String bytesToHex(byte[] bytes) {
-	    char[] hexChars = new char[bytes.length * 2];
-	    for ( int j = 0; j < bytes.length; j++ ) {
-	        int v = bytes[j] & 0xFF;
-	        hexChars[j * 2] = hexArr[v >>> 4];
-	        hexChars[j * 2 + 1] = hexArr[v & 0x0F];
-	    }
-	    return new String(hexChars);
-	}
-	
-	public void guiPrintArr(String init, byte[] msg, JTextArea a) {
-		String msgAsString = init + " " + new String(msg) + bytesToHex(msg) + "\n";
-		a.append(msgAsString);
-	}	
-	
-	public void guiPrint(String msg, JTextArea a) {
-		a.append(msg);
-	}
-	
-	
-	
 	/**
 	 * Writes a byte array into a file.
 	 * @param bytesArray Bytes to be written into file
@@ -728,63 +706,12 @@ public class ComFunctions {
 		
 	}
 	
-//	public void verboseMode(String status, byte[] packetType, String filename, String mode, JTextArea a) {
-//		String type = null;
-//		a.append("Packet " + status + "\n");
-//		if(packetType[0] ==  (byte)0 && packetType[1] == (byte)1) {
-//			type = "RRQ";
-//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)2) {
-//			type = "WRQ";
-//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)3) {
-//			type = "DATA";
-//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)4) {
-//			type = "ACK";
-//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)5) {
-//			type = "ERROR";
-//		}
-//		a.append(type + "\n");
-//		a.append("File Name: " + filename + "\n");
-//		a.append("Mode: " + mode + "\n");
-//	}
-//	
-//	public void verboseMode(String status, byte[] packetType, int blockNum, int numBytes, JTextArea a) {
-//		String type = null;
-//		a.append("Packet " + status + "\n");
-//		if(packetType[0] ==  (byte)0 && packetType[1] == (byte)1) {
-//			type = "RRQ";
-//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)2) {
-//			type = "WRQ";
-//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)3) {
-//			type = "DATA";
-//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)4) {
-//			type = "ACK";
-//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)5) {
-//			type = "ERROR";
-//		}
-//		a.append(type + "\n");
-//		a.append("Block Number: " + Integer.toString(blockNum) + "\n");
-//		a.append("Block Size: " + Integer.toString(numBytes) + "\n");
-//	}
-//	
-//	public void verboseMode(String status, byte[] packetType, byte[] blockNum, int numBytes, JTextArea a) {
-//		String type = null;
-//		a.append("Packet " + status + "\n");
-//		if(packetType[0] ==  (byte)0 && packetType[1] == (byte)1) {
-//			type = "RRQ";
-//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)2) {
-//			type = "WRQ";
-//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)3) {
-//			type = "DATA";
-//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)4) {
-//			type = "ACK";
-//		} else if (packetType[0] ==  (byte)0 && packetType[1] == (byte)5) {
-//			type = "ERROR";
-//		}
-//		a.append(type + "\n");
-//		a.append("Block Number: " + ByteBuffer.wrap(blockNum).getShort() + "\n");
-//		a.append("Block Size: " + Integer.toString(numBytes) + "\n");
-//	}
-	
+	/**
+	 * Updates a specified JTextArea with the current action
+	 * @param status action thats being performed
+	 * @param packet packet that has just been recieved or sent 
+	 * @param a JTextArea where the message needs to be displayed
+	 */
 	public void verboseMode(String status, DatagramPacket packet, JTextArea a) {
 		byte[] packetData = packet.getData();
 		String verbose = "";
@@ -818,6 +745,12 @@ public class ComFunctions {
 		a.append(verbose);
 	}
 	
+	/**
+	 * Returns a string with the current action
+	 * @param status action thats being performed
+	 * @param packet packet that has just been received or sent
+	 * @return String with the correct information
+	 */
 	public String verboseMode(String status, DatagramPacket packet) {
 		byte[] packetData = packet.getData();
 		String verbose = "";

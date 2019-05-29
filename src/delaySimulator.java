@@ -14,6 +14,7 @@ public class delaySimulator extends Thread{
 	
 	public void run() {
 		try{
+			//thread sleeps for delay milliseconds then sends the packet to target socket
 			Thread.sleep(delay);
 			com.sendPacket(packet, socket);
 		}

@@ -17,9 +17,6 @@ public class ServerWorker extends Thread {
 	private ComFunctions com;
 	private int job, mode;
 
-	//private byte[] fileByteReadArray, fileByteWriteArray;
-
-	
 	/**
 	 * Gets the name of the file that is being written into or read from
 	 */
@@ -37,9 +34,8 @@ public class ServerWorker extends Thread {
 			}
 		}
 		byte[] file = Arrays.copyOfRange(data, 2 , secondZero[1]);
-		//byte[] mode = Arrays.copyOfRange(data, secondZero[1]+1, secondZero[2]);
 		this.fileName = new String(file);
-		//this.mode = new String(mode);
+
 	}
 	
 	/**
@@ -59,20 +55,21 @@ public class ServerWorker extends Thread {
 		
 		byte [] fileByteReadArray = com.readFileIntoArray("./Server/" + fileName);
 		int blockNum = 1;
+		//Keeps looping until it is the entire file has been sent over
 		mainLoop:
 		while(true){
-			
 			byte[] msg = com.generateDataPacket(com.intToByte(blockNum), com.getBlock(blockNum, fileByteReadArray));
 			RecievedResponse = com.createPacket(100);
 			SendingResponse = com.createPacket(msg, interHostPort);
-			
+			//Loop that is in charge of sending/resending the data packet
 			outterSend:
 				while(true) {
-					com.sendPacket(SendingResponse, SendRecieveSocket);
+					com.sendPacket(SendingResponse, SendRecieveSocket); //Send message
 					if(mode == 1) {
 						System.out.println(com.verboseMode("Sent Packet:", SendingResponse));
 					}
 					try {
+						//Loop that ensures that the incoming AckPackets are correct, if it isn't, it will loop back to listening until the correct Ack is recieved or the the socket receive times out
 						innerSend:
 							while(true) {
 								SendRecieveSocket.receive(RecievedResponse);
@@ -85,15 +82,14 @@ public class ServerWorker extends Thread {
 									System.out.println("Wrong block recieved, continue waiting...");
 								}
 							}
-						break outterSend;
+						break outterSend; //DataPacket sent and the right AckReceived hence continues on to the next packet
 					} catch (IOException e) {
 						if(mode == 1) {
-							
 							System.out.println(com.verboseMode("Preparing to resend packet:", SendingResponse));
 						}
 					}
 				}
-			if(SendingResponse.getData()[SendingResponse.getLength() -1] == 0){
+			if(SendingResponse.getData()[SendingResponse.getLength() -1] == 0){ //Checks to see if the file has come to an end
 				System.out.println("End of file reached");
 				break mainLoop;
 			}
@@ -101,13 +97,15 @@ public class ServerWorker extends Thread {
 		}
 	}
 	
-	
+	/**
+	 * Handles the write request
+	 */
 	private void writeServe(){
 		File yourFile = new File("./Server/" + fileName);
+		//If the specified file doesn't exit, it will create it
 		try {
 			yourFile.createNewFile();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			System.exit(0);
 		}
@@ -118,24 +116,25 @@ public class ServerWorker extends Thread {
 		RecievedResponse = com.createPacket(BLOCK_SIZE);
 		
 		SendingResponse = com.createPacket(com.generateAckMessage(com.intToByte(blockNum)), interHostPort);
-		int expectedBlock = 1;
+		
 		blockNum++;
-		outterLoop:
-		while (true) {
+		
+		writeLoop:
+		while (true) {//Loop to write the entire file
 			mainLoop:
-				while(true) {
+				while(true) { //Loop that sends and resends AckPackets accordingly
+					com.sendPacket(SendingResponse, SendRecieveSocket);
 					if(mode == 1) {
 						System.out.println(com.verboseMode("Sent Packet:", SendingResponse));
 					}
-					com.sendPacket(SendingResponse, SendRecieveSocket);
 					try {
 						innerLoop:
-							while(true) {
+							while(true) { //Loop that listens for the incoming packet, if the packet is incorrect it keeps listing until the correct one is received 
 								SendRecieveSocket.receive(RecievedResponse);
 								if(mode == 1) {
 									System.out.println(com.verboseMode("Recieved Packet:", RecievedResponse));
 								}
-						
+								//Checks to see if the Data Packet received is the correct packet, if it isn't waits for next incoming packet
 								incomingBlock[0] = RecievedResponse.getData()[2];
 								incomingBlock[1] = RecievedResponse.getData()[3];
 								if( (blockNum == ByteBuffer.wrap(incomingBlock).getShort())) {
@@ -143,49 +142,31 @@ public class ServerWorker extends Thread {
 									last = RecievedResponse.getData()[RecievedResponse.getLength() -1];
 									ackMsg = com.generateAckMessage(com.intToByte(blockNum));
 									SendingResponse = com.createPacket(ackMsg, interHostPort);
-									if(last == 0){
+									if(last == 0){ //Checks for if the Data Packet is the last packet
 										com.sendPacket(SendingResponse, SendRecieveSocket);
 										if(mode == 1) {
 											System.out.println(com.verboseMode("Sent", SendingResponse));
 										}
 										System.out.println("End of file reached");
-										break outterLoop;
+										break writeLoop; //End of file receive so breaks out of all loops
 									}
-									break innerLoop;
+									break innerLoop; //The correct data Packet was received so it leaves the inner loop
 								
 								}else {
 									System.out.println("Wrong data packet recieved");
-									
 								}
 						
 							}
-						break mainLoop;
+						break mainLoop; //block was written in to file so the server can send the ack packet and start listening for n+1 packet
 					} catch (Exception e) {
 						// TODO: handle exception
+						//Receive timed out
 						if(mode == 1) {
 							System.out.println(com.verboseMode("Preparing to resend packet:", SendingResponse));
 						}
 					}
 				}
 			
-//			incomingBlock[0] = RecievedResponse.getData()[2];
-//			incomingBlock[1] = RecievedResponse.getData()[3];
-//			if(! (blockNum == ByteBuffer.wrap(incomingBlock).getShort())) {
-//				System.out.println("Wrong data packet recieved");
-//				System.exit(0);
-//			}
-//			com.writeArrayIntoFile(com.parseBlockData(RecievedResponse.getData()), Paths.get("./Server/" + fileName));
-//			last = RecievedResponse.getData()[RecievedResponse.getLength() -1];
-//			ackMsg = com.generateAckMessage(com.intToByte(blockNum));
-//			SendingResponse = com.createPacket(ackMsg, clientPort);
-//			if(last == 0){
-//				com.sendPacket(SendingResponse, SendRecieveSocket);
-//				if(mode == 1) {
-//					System.out.println(com.verboseMode("Sent", SendingResponse));
-//				}
-//				System.out.println("End of file reached");
-//				break outterLoop;
-//			}
 			++blockNum;
 		}
 	}

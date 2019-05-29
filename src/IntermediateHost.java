@@ -15,7 +15,7 @@ public class IntermediateHost {
 	
 	private static int packetNumber;
 	private static int packetDelay;
-	private static int simulation;
+	private static int simulation; // 0 = no errors, 1 = lose data packet, 2 = delay packet, 3 = duplicate packet
 	private static int dup;
 	private int packetCounter = 1;
 	
@@ -31,7 +31,8 @@ public class IntermediateHost {
 			switch (simulation) {
 				case 0: 
 					while(true) {
-					//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
+				
+					//Passes the packet between the client to server and vice versa
 					recievePacket = com.recievePacket(sendRecieveSocket, 516);
 					tempPort = recievePacket.getPort();
 					
@@ -68,9 +69,8 @@ public class IntermediateHost {
 					}
 				
 				case 1:
-					
 					while(true) {
-						//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
+						//Passes the packet between the client to server and vice versa
 						recievePacket = com.recievePacket(sendRecieveSocket, 516);
 						tempPort = recievePacket.getPort();
 						
@@ -109,7 +109,7 @@ public class IntermediateHost {
 							if((mode == 1) && (tempPort == serverPort)) {
 								System.out.println(com.verboseMode("Send to Client", recievePacket));
 							}
-						}else {
+						}else { //if we the packetCount has reached to the same value as the packetNumer we want to lose, the error simulator doesn't do anything with the packet
 							System.out.println("Simulating Lost Packet...");
 							packetCounter++;
 						}
@@ -157,6 +157,7 @@ public class IntermediateHost {
 								System.out.println(com.verboseMode("Send to Client", recievePacket));
 							}
 						}else{
+							//if we the packetCount has reached to the same value as the packetNumer we want to lose, the error simulator Starts a deyalSimulator that sends the packet after a specified period of time
 								packetCounter++;
 								System.out.println("Delaying packet...");
 								delaySimulator delay  = new delaySimulator(recievePacket, (long)packetDelay);
@@ -166,7 +167,7 @@ public class IntermediateHost {
 						
 					}
 				case 3:
-					while(true) {
+					while(true) { 
 						//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
 						recievePacket = com.recievePacket(sendRecieveSocket, 516);
 						tempPort = recievePacket.getPort();
@@ -207,6 +208,7 @@ public class IntermediateHost {
 								System.out.println(com.verboseMode("Send to Client", recievePacket));
 							}
 						}else {
+							//if we the packetCount has reached to the same value as the packetNumer we want to lose, the error simulator duplicates the packet dup number of times
 							for(int i = 0; i< dup; i ++) {
 								com.sendPacket(sendPacket, sendRecieveSocket);
 								if((mode == 1)&& (tempPort == clientPort)) {
@@ -221,13 +223,12 @@ public class IntermediateHost {
 							
 						}
 					}
-			//}
 		}
 	}
 	
-	
 	public IntermediateHost() {
 		// TODO Auto-generated constructor stub
+		//Getting user input on what error needs to be simulated
 		Scanner sc1 = new Scanner(System.in);
 		System.out.println("Select Mode : Quiet [0], Verbose [1]");
 		mode = sc1.nextInt();
@@ -257,8 +258,6 @@ public class IntermediateHost {
 			}
 		}
 		sc1.close();
-		
-		
 		com = new ComFunctions();
 		sendRecieveSocket = com.startSocket(interHostPort);
 		

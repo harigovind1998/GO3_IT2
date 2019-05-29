@@ -15,6 +15,7 @@ public class Server {
 	public void serve() {
 		while(true) {
 			recievePacket = com.recievePacket(recieveSocket, REQUEST_SIZE); 
+			//if the received packet is valid, passes the message onto a worker thread that takes care of all request until it is complete 
 			if (com.checkMessage(recievePacket.getData())) {
 				if(mode == 1) {
 					System.out.println(com.verboseMode("Recieve", recievePacket));
@@ -31,15 +32,16 @@ public class Server {
 		}
 	}
 	
+	/**
+	 * Initializes the server at the start
+	 */
 	public Server() {
 		// TODO Auto-generated constructor stub
 		Scanner sc = new Scanner(System.in);
 		System.out.println("Select Mode : Quiet [0], Verbose [1]");
 		mode = sc.nextInt();
-		//sc.close();
 		com = new ComFunctions();
 		recieveSocket = com.startSocket(69);
-		//recievePacket = com.createPacket(BLOCK_SIZE);
 		ServerExitListener exit = new ServerExitListener("Exit listener");
 		exit.start();
 	}
