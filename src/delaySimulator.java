@@ -4,8 +4,8 @@ public class delaySimulator extends Thread{
 	private ComFunctions com;
 	private DatagramPacket packet;
 	private DatagramSocket socket;
-	private int delay;
-	public delaySimulator(DatagramPacket packet, int delay) {
+	private long delay;
+	public delaySimulator(DatagramPacket packet, long delay) {
 		com = new ComFunctions();
 		socket = com.startSocket();
 		this.packet = packet;
@@ -14,7 +14,7 @@ public class delaySimulator extends Thread{
 	
 	public void run() {
 		try{
-			Thread.sleep(delay*1000);
+			Thread.sleep(delay);
 			com.sendPacket(packet, socket);
 		}
 		catch(InterruptedException e){

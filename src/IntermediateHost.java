@@ -4,8 +4,8 @@ import java.util.Scanner;
 
 public class IntermediateHost {
 	
-	DatagramSocket recieveSocket, clientSendSocket, sendSocket;
-	DatagramPacket clientRecievePacket, clientSendPacket, serverSendPacket, serverRecievePacket;
+	DatagramSocket sendRecieveSocket;
+	DatagramPacket recievePacket, sendPacket;
 	ComFunctions com;
 	workerThread externalThread;
 	int serverPort = 69;
@@ -32,82 +32,82 @@ public class IntermediateHost {
 				case 0: 
 					while(true) {
 					//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
-					clientRecievePacket = com.recievePacket(recieveSocket, 516);
-					tempPort = clientRecievePacket.getPort();
-					System.out.println(tempPort);
+					recievePacket = com.recievePacket(sendRecieveSocket, 516);
+					tempPort = recievePacket.getPort();
+					
 					if(packet == 0) {
 						clientPort = tempPort;
 						if(mode == 1) {
-							System.out.println(com.verboseMode("Recieve from client", clientRecievePacket));
+							System.out.println(com.verboseMode("Recieve from client", recievePacket));
 						}
 					}else if(!(tempPort == clientPort)) {
 						serverPort = tempPort;
 						if(mode == 1) {
-							System.out.println(com.verboseMode("Recieve from server", clientRecievePacket));
+							System.out.println(com.verboseMode("Recieve from server", recievePacket));
 						}
 					}else if(tempPort == clientPort) {
 						if(mode == 1) {
-							System.out.println(com.verboseMode("Recieve from client", clientRecievePacket));
+							System.out.println(com.verboseMode("Recieve from client", recievePacket));
 						}
 					}
 					packet ++;
 					if(tempPort == clientPort) {
-						serverSendPacket = com.createPacket(clientRecievePacket.getData(), serverPort);
+						sendPacket = com.createPacket(recievePacket.getData(), serverPort);
 						if(mode == 1) {
-							System.out.println(com.verboseMode("Send to Server", clientRecievePacket));
+							System.out.println(com.verboseMode("Send to Server", recievePacket));
 						}
 					}else if(tempPort == serverPort) {
-						serverSendPacket = com.createPacket(clientRecievePacket.getData(), clientPort);
+						sendPacket = com.createPacket(recievePacket.getData(), clientPort);
 						if(mode == 1) {
-							System.out.println(com.verboseMode("Send to Client", clientRecievePacket));
+							System.out.println(com.verboseMode("Send to Client", recievePacket));
 						}
 					}
 									
 					
-					com.sendPacket(serverSendPacket, sendSocket);
+					com.sendPacket(sendPacket, sendRecieveSocket);
 					}
 				
 				case 1:
 					
 					while(true) {
 						//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
-						clientRecievePacket = com.recievePacket(recieveSocket, 516);
-						tempPort = clientRecievePacket.getPort();
-						System.out.println(tempPort);
+						recievePacket = com.recievePacket(sendRecieveSocket, 516);
+						tempPort = recievePacket.getPort();
+						
 						if(packet == 0) {
 							clientPort = tempPort;
 							if(mode == 1) {
-								System.out.println(com.verboseMode("Recieve from client", clientRecievePacket));
+								System.out.println(com.verboseMode("Recieve from client", recievePacket));
 							}
 						}else if(!(tempPort == clientPort)) {
 							serverPort = tempPort;
 							if(mode == 1) {
-								System.out.println(com.verboseMode("Recieve from server", clientRecievePacket));
+								System.out.println(com.verboseMode("Recieve from server", recievePacket));
 							}
 						}else if(tempPort == clientPort) {
 							if(mode == 1) {
-								System.out.println(com.verboseMode("Recieve from client", clientRecievePacket));
+								System.out.println(com.verboseMode("Recieve from client", recievePacket));
 							}
 						}
 						packet ++;
 						if(tempPort == clientPort) {
-							serverSendPacket = com.createPacket(clientRecievePacket.getData(), serverPort);
+							sendPacket = com.createPacket(recievePacket.getData(), serverPort);
 							
 						}else if(tempPort == serverPort) {
-							serverSendPacket = com.createPacket(clientRecievePacket.getData(), clientPort);
+							sendPacket = com.createPacket(recievePacket.getData(), clientPort);
 							
 						}
 					
 						if (!(packetCounter == packetNumber)) {
 							
-							com.sendPacket(serverSendPacket, sendSocket);
+							com.sendPacket(sendPacket, sendRecieveSocket);
 							packetCounter++;
 							if((mode == 1)&& (tempPort == clientPort)) {
-								System.out.println(com.verboseMode("Send to Server", clientRecievePacket));
+								System.out.println(com.verboseMode("Send to Server", recievePacket));
 							}
 							
 							if((mode == 1) && (tempPort == serverPort)) {
-								System.out.println(com.verboseMode("Send to Client", clientRecievePacket));
+								System.out.println(com.verboseMode("Send to Client", recievePacket));
 							}
 						}else {
 							System.out.println("Simulating Lost Packet...");
@@ -121,45 +121,45 @@ public class IntermediateHost {
 				case 2:
 					while(true) {
 						//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
-						clientRecievePacket = com.recievePacket(recieveSocket, 516);
-						tempPort = clientRecievePacket.getPort();
-						System.out.println(tempPort);
+						recievePacket = com.recievePacket(sendRecieveSocket, 516);
+						tempPort = recievePacket.getPort();
+						
 						if(packet == 0) {
 							clientPort = tempPort;
 							if(mode == 1) {
-								System.out.println(com.verboseMode("Recieve from client", clientRecievePacket));
+								System.out.println(com.verboseMode("Recieve from client", recievePacket));
 							}
 						}else if(!(tempPort == clientPort)) {
 							serverPort = tempPort;
 							if(mode == 1) {
-								System.out.println(com.verboseMode("Recieve from server", clientRecievePacket));
+								System.out.println(com.verboseMode("Recieve from server", recievePacket));
 							}
 						}else if(tempPort == clientPort) {
 							if(mode == 1) {
-								System.out.println(com.verboseMode("Recieve from client", clientRecievePacket));
+								System.out.println(com.verboseMode("Recieve from client", recievePacket));
 							}
 						}
 						packet ++;
 						if(tempPort == clientPort) {
-							serverSendPacket = com.createPacket(clientRecievePacket.getData(), serverPort);
+							sendPacket = com.createPacket(recievePacket.getData(), serverPort);
 						}else if(tempPort == serverPort) {
-							serverSendPacket = com.createPacket(clientRecievePacket.getData(), clientPort);
+							sendPacket = com.createPacket(recievePacket.getData(), clientPort);
 						}
 										
 						if(packetCounter != packetNumber) {
-							com.sendPacket(serverSendPacket, sendSocket);
+							com.sendPacket(sendPacket, sendRecieveSocket);
 							packetCounter++;
 							if((mode == 1)&& (tempPort == clientPort)) {
-								System.out.println(com.verboseMode("Send to Server", clientRecievePacket));
+								System.out.println(com.verboseMode("Send to Server", recievePacket));
 							}
 							
 							if((mode == 1) && (tempPort == serverPort)) {
-								System.out.println(com.verboseMode("Send to Client", clientRecievePacket));
+								System.out.println(com.verboseMode("Send to Client", recievePacket));
 							}
 						}else{
-							packetCounter++;
+								packetCounter++;
 								System.out.println("Delaying packet...");
-								delaySimulator delay  = new delaySimulator(clientRecievePacket, packetDelay);
+								delaySimulator delay  = new delaySimulator(recievePacket, (long)packetDelay);
 								
 							}
 						
@@ -168,53 +168,53 @@ public class IntermediateHost {
 				case 3:
 					while(true) {
 						//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server
-						clientRecievePacket = com.recievePacket(recieveSocket, 516);
-						tempPort = clientRecievePacket.getPort();
-						System.out.println(tempPort);
+						recievePacket = com.recievePacket(sendRecieveSocket, 516);
+						tempPort = recievePacket.getPort();
+						
 						if(packet == 0) {
 							clientPort = tempPort;
 							if(mode == 1) {
-								System.out.println(com.verboseMode("Recieve from client", clientRecievePacket));
+								System.out.println(com.verboseMode("Recieve from client", recievePacket));
 							}
 						}else if(!(tempPort == clientPort)) {
 							serverPort = tempPort;
 							if(mode == 1) {
-								System.out.println(com.verboseMode("Recieve from server", clientRecievePacket));
+								System.out.println(com.verboseMode("Recieve from server", recievePacket));
 							}
 						}else if(tempPort == clientPort) {
 							if(mode == 1) {
-								System.out.println(com.verboseMode("Recieve from client", clientRecievePacket));
+								System.out.println(com.verboseMode("Recieve from client", recievePacket));
 							}
 						}
 						
 						packet ++;
 						if(tempPort == clientPort) {
-							serverSendPacket = com.createPacket(clientRecievePacket.getData(), serverPort);
+							sendPacket = com.createPacket(recievePacket.getData(), serverPort);
 							
 						}else if(tempPort == serverPort) {
-							serverSendPacket = com.createPacket(clientRecievePacket.getData(), clientPort);
+							sendPacket = com.createPacket(recievePacket.getData(), clientPort);
 							
 						}
 										
 						if(packetCounter != packetNumber) {
-							com.sendPacket(serverSendPacket, sendSocket);
+							com.sendPacket(sendPacket, sendRecieveSocket);
 							packetCounter++;
 							if((mode == 1)&& (tempPort == clientPort)) {
-								System.out.println(com.verboseMode("Send to Server", clientRecievePacket));
+								System.out.println(com.verboseMode("Send to Server", recievePacket));
 							}
 							
 							if((mode == 1) && (tempPort == serverPort)) {
-								System.out.println(com.verboseMode("Send to Client", clientRecievePacket));
+								System.out.println(com.verboseMode("Send to Client", recievePacket));
 							}
 						}else {
 							for(int i = 0; i< dup; i ++) {
-								com.sendPacket(serverSendPacket, sendSocket);
+								com.sendPacket(sendPacket, sendRecieveSocket);
 								if((mode == 1)&& (tempPort == clientPort)) {
-									System.out.println(com.verboseMode("Duplicate send to Server", clientRecievePacket));
+									System.out.println(com.verboseMode("Duplicate send to Server", recievePacket));
 								}
 								
 								if((mode == 1) && (tempPort == serverPort)) {
-									System.out.println(com.verboseMode("duplicate Send to Client", clientRecievePacket));
+									System.out.println(com.verboseMode("duplicate Send to Client", recievePacket));
 								}
 							}
 							packetCounter++;
@@ -260,9 +260,8 @@ public class IntermediateHost {
 		
 		
 		com = new ComFunctions();
-		clientSendSocket = com.startSocket();
-		recieveSocket = com.startSocket(interHostPort);
-		sendSocket = com.startSocket();
+		sendRecieveSocket = com.startSocket(interHostPort);
+		
 	}
 	
 	public static void main(String[] args) {		

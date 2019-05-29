@@ -8,9 +8,10 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class ServerWorker extends Thread {
+	
 	private final int BLOCK_SIZE = 516;
 	private DatagramPacket initialPacket, RecievedResponse, SendingResponse;
-	private int interHostPort = 23;
+	private int interHostPort;
 	private String fileName;
 	private DatagramSocket SendRecieveSocket; 
 	private ComFunctions com;
@@ -46,7 +47,7 @@ public class ServerWorker extends Thread {
 	 */
 	private void decodePacket() {
 		job = initialPacket.getData()[1]; //format of the message has been checked so second bit will determine if the request is a read or write
-		
+		interHostPort = initialPacket.getPort();
 		getFileName();
 	}
 	
