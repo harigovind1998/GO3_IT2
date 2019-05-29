@@ -160,7 +160,7 @@ public class Client {
 				while(true) {
 					com.sendPacket(sendPacket, sendRecieveSocket);
 					if(mode == 1) {
-						com.verboseMode("Sent", sendPacket, area);
+						com.verboseMode("Sent Packet:", sendPacket, area);
 					}
 					try {
 						boolean temp = true;
@@ -172,7 +172,7 @@ public class Client {
 								
 								
 								if (mode == 1) {
-									com.verboseMode("Received:", recievePacket, area);
+									com.verboseMode("Received Packet:", recievePacket, area);
 								}
 								break sendLoop;
 							}else {
@@ -223,7 +223,7 @@ public class Client {
 					while(true) {
 						sendRecieveSocket.receive(recievePacket);
 						if (mode == 1) {
-							com.verboseMode("Received", recievePacket, area);
+							com.verboseMode("Received Packet:", recievePacket, area);
 						}
 						messageReceived = recievePacket.getData();
 						//Add check  to see if the packet is a data Packet
@@ -244,19 +244,19 @@ public class Client {
 							if(dataReceived[511] == (byte)0) {
 								com.sendPacket(sendPacket, sendRecieveSocket);
 								if (mode == 1) {
-									com.verboseMode("Sent", sendPacket, area);
+									com.verboseMode("Sent Packet:", sendPacket, area);
 								}
 								break outerloop;
 							}
 							break innerLoop;
 						}else {
-							area.append("Recieved the same data block multiple times\n");
+							area.append("Wrong Packet Recieved, ignoring\n");
 						}
 					}
 					break sendLoop;
 				} catch (Exception e) {
 					// TODO: handle exception
-					com.verboseMode("Resending", sendPacket, area);
+					com.verboseMode("Preparing to resend packet:", sendPacket, area);
 				}
 				
 			}
