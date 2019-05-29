@@ -187,6 +187,7 @@ public class Client {
 				}
 			
 		}
+		area.append("End of File reached!\n");
 	}
 	
 	public void readFile(String name, String format) {
@@ -286,6 +287,7 @@ public class Client {
 //			}
 			
 		}
+		area.append("End of File reached!\n");
 		
 	}
 	

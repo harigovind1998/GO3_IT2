@@ -69,26 +69,26 @@ public class ServerWorker extends Thread {
 				while(true) {
 					com.sendPacket(SendingResponse, SendRecieveSocket);
 					if(mode == 1) {
-						System.out.println(com.verboseMode("Sent", SendingResponse));
+						System.out.println(com.verboseMode("Sent Packet:", SendingResponse));
 					}
 					try {
 						innerSend:
 							while(true) {
 								SendRecieveSocket.receive(RecievedResponse);
 								if(mode == 1) {
-									System.out.println(com.verboseMode("Recieve", RecievedResponse));
+									System.out.println(com.verboseMode("Recieved Packet:", RecievedResponse));
 								}
 								if(com.CheckAck(RecievedResponse, blockNum)) {
 									break innerSend;
 								}else {
-									System.out.println("Wrong block recieved");
+									System.out.println("Wrong block recieved, continue waiting...");
 								}
 							}
 						break outterSend;
 					} catch (IOException e) {
 						if(mode == 1) {
 							
-							System.out.println(com.verboseMode("Preparing packet for Resend", SendingResponse));
+							System.out.println(com.verboseMode("Preparing to resend packet:", SendingResponse));
 						}
 					}
 				}
@@ -124,7 +124,7 @@ public class ServerWorker extends Thread {
 			mainLoop:
 				while(true) {
 					if(mode == 1) {
-						System.out.println(com.verboseMode("Sent", SendingResponse));
+						System.out.println(com.verboseMode("Sent Packet:", SendingResponse));
 					}
 					com.sendPacket(SendingResponse, SendRecieveSocket);
 					try {
@@ -132,7 +132,7 @@ public class ServerWorker extends Thread {
 							while(true) {
 								SendRecieveSocket.receive(RecievedResponse);
 								if(mode == 1) {
-									System.out.println(com.verboseMode("Recieve", RecievedResponse));
+									System.out.println(com.verboseMode("Recieved Packet:", RecievedResponse));
 								}
 						
 								incomingBlock[0] = RecievedResponse.getData()[2];
@@ -162,7 +162,7 @@ public class ServerWorker extends Thread {
 					} catch (Exception e) {
 						// TODO: handle exception
 						if(mode == 1) {
-							System.out.println(com.verboseMode("ReSending", SendingResponse));
+							System.out.println(com.verboseMode("Preparing to resend packet:", SendingResponse));
 						}
 					}
 				}
