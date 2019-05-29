@@ -50,7 +50,7 @@ Java (using preferably Eclipse IDE)
 
 ## Authors
 
-	* Steven Chow
+	* Steven Zhou
 	* Hariprasadh Ravichandran Govindasamy
 	* Tarun Kalikivaya
 	* Yohannes Kussia
