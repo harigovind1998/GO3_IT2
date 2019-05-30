@@ -113,11 +113,7 @@ public class IntermediateHost {
 							System.out.println("Simulating Lost Packet...");
 							packetCounter++;
 						}
-										
-						
-							
-						}
-					
+					}
 				case 2:
 					while(true) {
 						//Recieving a message to from the client, prints the message, created a new packet to send to the server, prints that message for clarification and sends it the server

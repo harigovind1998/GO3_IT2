@@ -175,7 +175,6 @@ public class ServerWorker extends Thread {
 	 * decodes and then performs the necessary task
 	 */
 	public void run() {
-		
 		decodePacket();
 		if(job == 1) {
 			readServe();
